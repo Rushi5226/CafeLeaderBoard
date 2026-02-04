@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cafe Admin - Order Entry</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #0f0f0f;
+            --bg-card: #1a1a1a;
+            --accent: #ff6b35;
+            --accent-glow: rgba(255, 107, 53, 0.2);
+            --text: #ffffff;
+            --text-dim: #888888;
+            --success: #00ff87;
+            --border: #333333;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 2rem;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(255, 107, 53, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(0, 255, 135, 0.05) 0%, transparent 50%);
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            animation: fadeIn 0.6s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: slideDown 0.8s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent), var(--success));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+            letter-spacing: -1px;
+        }
+
+        .subtitle {
+            color: var(--text-dim);
+            font-size: 1rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.6);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-dim);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 1rem;
+            background: var(--bg-dark);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px var(--accent-glow);
+        }
+
+        input[type="number"] {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
+            font-size: 1.25rem;
+        }
+
+        .autocomplete-container {
+            position: relative;
+        }
+
+        .autocomplete-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--bg-dark);
+            border: 2px solid var(--border);
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+
+        .autocomplete-results.active {
+            display: block;
+        }
+
+        .autocomplete-item {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+
+        .autocomplete-item:hover {
+            background: var(--bg-card);
+        }
+
+        .autocomplete-item.selected {
+            background: var(--accent);
+            color: var(--bg-dark);
+        }
+
+        button {
+            width: 100%;
+            padding: 1.25rem;
+            background: linear-gradient(135deg, var(--accent), #ff8563);
+            border: none;
+            border-radius: 12px;
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.125rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px var(--accent-glow);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .success-message {
+            background: var(--success);
+            color: var(--bg-dark);
+            padding: 1rem;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 600;
+            margin-top: 1rem;
+            display: none;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .config-section {
+            background: linear-gradient(135deg, rgba(255, 107, 53, 0.1), rgba(0, 255, 135, 0.1));
+            border: 2px solid var(--accent);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .config-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--accent);
+        }
+
+        .config-input {
+            background: var(--bg-dark);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 0.75rem;
+            width: 100%;
+            color: var(--text);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .help-text {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            margin-top: 0.5rem;
+        }
+
+        .link-button {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: var(--bg-card);
+            border: 2px solid var(--accent);
+            border-radius: 8px;
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .link-button:hover {
+            background: var(--accent);
+            color: var(--bg-dark);
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            gap: 1rem;
+        }
+
+        .settings-btn {
+            padding: 0.75rem 1.5rem;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-dim);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: auto;
+        }
+
+        .settings-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .settings-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .settings-overlay.active {
+            display: flex;
+        }
+
+        .settings-modal {
+            background: var(--bg-card);
+            border: 2px solid var(--accent);
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            animation: slideIn 0.3s ease;
+        }
+
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .settings-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-dim);
+            font-size: 2rem;
+            cursor: pointer;
+            padding: 0;
+            width: auto;
+            line-height: 1;
+        }
+
+        .close-btn:hover {
+            color: var(--text);
+        }
+
+        .settings-input {
+            width: 100%;
+            padding: 1rem;
+            background: var(--bg-dark);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            color: var(--text);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        .settings-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .settings-help {
+            font-size: 0.875rem;
+            color: var(--text-dim);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .settings-save-btn {
+            width: 100%;
+        }
+
+        .first-time-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.98);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+        }
+
+        .first-time-overlay.active {
+            display: flex;
+        }
+
+        .first-time-modal {
+            background: linear-gradient(135deg, var(--bg-card), #252525);
+            border: 3px solid var(--accent);
+            border-radius: 20px;
+            padding: 3rem;
+            max-width: 650px;
+            width: 90%;
+            text-align: center;
+            animation: popIn 0.5s ease;
+        }
+
+        .first-time-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .first-time-title {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent), var(--success));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        .first-time-text {
+            font-size: 1.125rem;
+            color: var(--text-dim);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .pin-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.98);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 4000;
+        }
+
+        .pin-overlay.active {
+            display: flex;
+        }
+
+        .pin-modal {
+            background: linear-gradient(135deg, var(--bg-card), #1f1f1f);
+            border: 3px solid var(--accent);
+            border-radius: 20px;
+            padding: 3rem;
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+            animation: popIn 0.5s ease;
+        }
+
+        .pin-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .pin-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        .pin-text {
+            font-size: 1.125rem;
+            color: var(--text-dim);
+            margin-bottom: 2rem;
+        }
+
+        .pin-input {
+            width: 100%;
+            padding: 1.5rem;
+            background: var(--bg-dark);
+            border: 3px solid var(--border);
+            border-radius: 12px;
+            color: var(--text);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2rem;
+            text-align: center;
+            letter-spacing: 0.5rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .pin-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px var(--accent-glow);
+        }
+
+        .pin-input.error {
+            border-color: #ff3366;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .pin-error {
+            color: #ff3366;
+            font-size: 0.875rem;
+            margin-top: -1rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .pin-error.show {
+            display: block;
+        }
+
+        .pin-submit {
+            width: 100%;
+            padding: 1.25rem;
+            background: linear-gradient(135deg, var(--accent), #ff8563);
+            border: none;
+            border-radius: 12px;
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .pin-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px var(--accent-glow);
+        }
+
+        .quick-amounts {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .quick-amount {
+            padding: 0.75rem;
+            background: var(--bg-dark);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .quick-amount:hover {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+        }
+
+        .quick-amount.active {
+            border-color: var(--accent);
+            background: var(--accent);
+            color: var(--bg-dark);
+        }
+    </style>
+</head>
+<body>
+    <!-- PIN Authentication -->
+    <div id="pinOverlay" class="pin-overlay active">
+        <div class="pin-modal">
+            <div class="pin-icon">🔒</div>
+            <div class="pin-title">Admin Access</div>
+            <div class="pin-text">Enter your PIN to continue</div>
+            <input type="password" id="pinInput" class="pin-input" placeholder="••••" maxlength="4" autocomplete="off" inputmode="numeric">
+            <div class="pin-error" id="pinError">Incorrect PIN. Please try again.</div>
+            <button class="pin-submit" onclick="verifyPin()">🔓 Unlock</button>
+        </div>
+    </div>
+
+    <!-- First Time Setup -->
+    <div id="firstTimeOverlay" class="first-time-overlay">
+        <div class="first-time-modal">
+            <div class="first-time-icon">🚀</div>
+            <div class="first-time-title">Welcome to Your Cafe Leaderboard!</div>
+            <div class="first-time-text">
+                Let's get you set up. You'll need your Google Apps Script URL to connect this dashboard to your Google Sheets.
+            </div>
+            <div class="form-group" style="text-align: left;">
+                <label>Google Apps Script URL</label>
+                <input type="text" id="firstTimeScriptUrl" class="settings-input" placeholder="https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec">
+                <p class="help-text">This is a one-time setup. Deploy your Google Apps Script as a web app and paste the URL here.</p>
+            </div>
+            <button onclick="saveFirstTimeSetup()" style="width: 100%; margin-top: 1rem;">✓ Complete Setup</button>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsOverlay" class="settings-overlay">
+        <div class="settings-modal">
+            <div class="settings-header">
+                <div class="settings-title">⚙️ Settings</div>
+                <button class="close-btn" onclick="closeSettings()">×</button>
+            </div>
+            <div class="form-group">
+                <label>Google Apps Script URL</label>
+                <input type="text" id="settingsScriptUrl" class="settings-input" placeholder="https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec">
+                <div class="settings-help">
+                    <strong>Current Status:</strong> <span id="connectionStatus">Not configured</span><br>
+                    Update this URL if you need to change your Google Sheets connection.
+                </div>
+            </div>
+            <button class="settings-save-btn" onclick="saveSettings()">💾 Save Settings</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>☕ Order Entry</h1>
+            <p class="subtitle">Track customer purchases • Build leaderboard</p>
+        </header>
+
+        <div class="top-bar">
+            <button class="settings-btn" onclick="showSettings()">⚙️ Settings</button>
+            <a href="leaderboard.html" class="link-button" target="_blank">🖥️ Open TV Leaderboard</a>
+        </div>
+
+        <div class="card">
+            <form id="orderForm">
+                <div class="form-group">
+                    <label>Customer Name</label>
+                    <div class="autocomplete-container">
+                        <input type="text" id="customerName" placeholder="Search or enter new customer name" autocomplete="off" required>
+                        <div class="autocomplete-results" id="autocompleteResults"></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Order Amount (₹)</label>
+                    <input type="number" id="orderAmount" placeholder="0" min="1" step="1" required>
+                    <div class="quick-amounts">
+                        <div class="quick-amount" data-amount="100">₹100</div>
+                        <div class="quick-amount" data-amount="150">₹150</div>
+                        <div class="quick-amount" data-amount="200">₹200</div>
+                        <div class="quick-amount" data-amount="250">₹250</div>
+                    </div>
+                </div>
+
+                <button type="submit" id="submitBtn">💾 Save Order</button>
+                <div class="success-message" id="successMessage">✓ Order saved successfully!</div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // PIN Authentication
+        const CORRECT_PIN = '6678';
+        const SESSION_KEY = 'adminSession';
+        const SESSION_DURATION = 30 * 60 * 1000; // 30 minutes in milliseconds
+
+        // Check PIN authentication on page load
+        function checkPinAuth() {
+            const session = localStorage.getItem(SESSION_KEY);
+            if (session) {
+                const sessionData = JSON.parse(session);
+                const now = new Date().getTime();
+                
+                // Check if session is still valid
+                if (now - sessionData.timestamp < SESSION_DURATION) {
+                    // Valid session, hide PIN overlay
+                    document.getElementById('pinOverlay').classList.remove('active');
+                    return true;
+                } else {
+                    // Session expired, remove it
+                    localStorage.removeItem(SESSION_KEY);
+                }
+            }
+            
+            // No valid session, show PIN overlay
+            document.getElementById('pinOverlay').classList.add('active');
+            // Focus on PIN input
+            setTimeout(() => {
+                document.getElementById('pinInput').focus();
+            }, 300);
+            return false;
+        }
+
+        // Verify PIN
+        function verifyPin() {
+            const pinInput = document.getElementById('pinInput');
+            const pinError = document.getElementById('pinError');
+            const enteredPin = pinInput.value;
+
+            if (enteredPin === CORRECT_PIN) {
+                // Correct PIN - create session
+                const session = {
+                    timestamp: new Date().getTime(),
+                    authenticated: true
+                };
+                localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+                
+                // Hide PIN overlay
+                document.getElementById('pinOverlay').classList.remove('active');
+                
+                // Clear input
+                pinInput.value = '';
+                pinError.classList.remove('show');
+                pinInput.classList.remove('error');
+                
+                // Continue with normal flow
+                checkFirstTimeSetup();
+            } else {
+                // Incorrect PIN
+                pinError.classList.add('show');
+                pinInput.classList.add('error');
+                pinInput.value = '';
+                
+                // Remove error animation after it completes
+                setTimeout(() => {
+                    pinInput.classList.remove('error');
+                }, 500);
+            }
+        }
+
+        // Add Enter key support for PIN input
+        document.addEventListener('DOMContentLoaded', function() {
+            const pinInput = document.getElementById('pinInput');
+            if (pinInput) {
+                pinInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        verifyPin();
+                    }
+                });
+                
+                // Auto-submit when 4 digits entered
+                pinInput.addEventListener('input', function(e) {
+                    if (this.value.length === 4) {
+                        setTimeout(() => verifyPin(), 300);
+                    }
+                });
+            }
+        });
+
+        // Configuration
+        const SCRIPT_URL_KEY = 'cafeScriptUrl';
+        let customers = [];
+
+        // Check if first time setup needed
+        function checkFirstTimeSetup() {
+            const savedUrl = localStorage.getItem(SCRIPT_URL_KEY);
+            if (!savedUrl) {
+                document.getElementById('firstTimeOverlay').classList.add('active');
+            } else {
+                updateConnectionStatus();
+            }
+        }
+
+        // Save first time setup
+        function saveFirstTimeSetup() {
+            const url = document.getElementById('firstTimeScriptUrl').value.trim();
+            if (!url) {
+                alert('Please enter your Google Apps Script URL');
+                return;
+            }
+            if (!url.includes('script.google.com')) {
+                alert('Please enter a valid Google Apps Script URL');
+                return;
+            }
+            localStorage.setItem(SCRIPT_URL_KEY, url);
+            document.getElementById('firstTimeOverlay').classList.remove('active');
+            updateConnectionStatus();
+            fetchCustomers();
+        }
+
+        // Show settings modal
+        function showSettings() {
+            const savedUrl = localStorage.getItem(SCRIPT_URL_KEY);
+            if (savedUrl) {
+                document.getElementById('settingsScriptUrl').value = savedUrl;
+            }
+            document.getElementById('settingsOverlay').classList.add('active');
+            updateConnectionStatus();
+        }
+
+        // Close settings modal
+        function closeSettings() {
+            document.getElementById('settingsOverlay').classList.remove('active');
+        }
+
+        // Save settings
+        function saveSettings() {
+            const url = document.getElementById('settingsScriptUrl').value.trim();
+            if (!url) {
+                alert('Please enter your Google Apps Script URL');
+                return;
+            }
+            if (!url.includes('script.google.com')) {
+                alert('Please enter a valid Google Apps Script URL');
+                return;
+            }
+            localStorage.setItem(SCRIPT_URL_KEY, url);
+            closeSettings();
+            updateConnectionStatus();
+            fetchCustomers();
+        }
+
+        // Update connection status
+        function updateConnectionStatus() {
+            const savedUrl = localStorage.getItem(SCRIPT_URL_KEY);
+            const statusElement = document.getElementById('connectionStatus');
+            if (statusElement) {
+                if (savedUrl) {
+                    statusElement.textContent = '✓ Connected';
+                    statusElement.style.color = 'var(--success)';
+                } else {
+                    statusElement.textContent = '✗ Not configured';
+                    statusElement.style.color = 'var(--accent)';
+                }
+            }
+        }
+
+        // Get script URL
+        function getScriptUrl() {
+            return localStorage.getItem(SCRIPT_URL_KEY);
+        }
+
+        // Form elements
+        const form = document.getElementById('orderForm');
+        const customerNameInput = document.getElementById('customerName');
+        const orderAmountInput = document.getElementById('orderAmount');
+        const autocompleteResults = document.getElementById('autocompleteResults');
+        const submitBtn = document.getElementById('submitBtn');
+        const successMessage = document.getElementById('successMessage');
+
+        // Quick amount buttons
+        document.querySelectorAll('.quick-amount').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const amount = this.dataset.amount;
+                orderAmountInput.value = amount;
+                document.querySelectorAll('.quick-amount').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Fetch existing customers
+        async function fetchCustomers() {
+            const scriptUrl = getScriptUrl();
+            if (!scriptUrl) return;
+
+            try {
+                const url = scriptUrl + '?action=getCustomers&t=' + new Date().getTime();
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                    },
+                    cache: 'no-cache'
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.error) {
+                    console.error('API Error:', data.error);
+                    return;
+                }
+                
+                if (data.customers) {
+                    customers = data.customers;
+                }
+            } catch (error) {
+                console.error('Error fetching customers:', error);
+                // Don't show error to user, just log it
+            }
+        }
+
+        // Autocomplete functionality
+        customerNameInput.addEventListener('input', function() {
+            const value = this.value.toLowerCase();
+            if (value.length < 1) {
+                autocompleteResults.classList.remove('active');
+                return;
+            }
+
+            const filtered = customers.filter(c => c.toLowerCase().includes(value));
+            
+            if (filtered.length > 0) {
+                autocompleteResults.innerHTML = filtered
+                    .slice(0, 5)
+                    .map(c => `<div class="autocomplete-item">${c}</div>`)
+                    .join('');
+                autocompleteResults.classList.add('active');
+
+                // Add click handlers
+                document.querySelectorAll('.autocomplete-item').forEach(item => {
+                    item.addEventListener('click', function() {
+                        customerNameInput.value = this.textContent;
+                        autocompleteResults.classList.remove('active');
+                    });
+                });
+            } else {
+                autocompleteResults.classList.remove('active');
+            }
+        });
+
+        // Close autocomplete when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.autocomplete-container')) {
+                autocompleteResults.classList.remove('active');
+            }
+        });
+
+        // Form submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const scriptUrl = getScriptUrl();
+            if (!scriptUrl) {
+                alert('Please configure Google Sheets URL in Settings first!');
+                showSettings();
+                return;
+            }
+
+            const customerName = customerNameInput.value.trim();
+            const orderAmount = parseInt(orderAmountInput.value);
+
+            if (!customerName || !orderAmount) {
+                alert('Please fill all fields');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Saving...';
+
+            try {
+                const response = await fetch(scriptUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'addOrder',
+                        customerName: customerName,
+                        amount: orderAmount,
+                        date: new Date().toISOString()
+                    })
+                });
+
+                // Show success message
+                successMessage.classList.add('show');
+                setTimeout(() => {
+                    successMessage.classList.remove('show');
+                }, 3000);
+
+                // Reset form
+                customerNameInput.value = '';
+                orderAmountInput.value = '';
+                document.querySelectorAll('.quick-amount').forEach(b => b.classList.remove('active'));
+
+                // Refresh customer list
+                await fetchCustomers();
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Order saved! (Note: Response verification not available due to CORS)');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '💾 Save Order';
+            }
+        });
+
+        // Initial setup
+        if (checkPinAuth()) {
+            // If already authenticated, proceed with setup
+            checkFirstTimeSetup();
+            fetchCustomers();
+        }
+        // Note: checkFirstTimeSetup and fetchCustomers are also called in verifyPin() after successful auth
+        setInterval(fetchCustomers, 30000); // Refresh every 30 seconds
+    </script>
+</body>
+</html>

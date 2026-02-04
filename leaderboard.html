@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cafe Leaderboard - Top Customers</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Righteous&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #0a0a0a;
+            --gold: #ffd700;
+            --silver: #c0c0c0;
+            --bronze: #cd7f32;
+            --accent: #ff3366;
+            --text: #ffffff;
+            --card-bg: #1a1a1a;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(255, 215, 0, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(255, 51, 102, 0.08) 0%, transparent 40%);
+        }
+
+        .container {
+            padding: 3rem 4rem;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            animation: fadeInDown 1s ease;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo {
+            font-size: 4rem;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        h1 {
+            font-family: 'Bebas Neue', cursive;
+            font-size: 5rem;
+            background: linear-gradient(135deg, var(--gold), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin: 1rem 0;
+        }
+
+        .week-info {
+            font-size: 1.5rem;
+            color: #888;
+            font-weight: 600;
+        }
+
+        .leaderboard {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            animation: fadeIn 1.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .rank-card {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 2rem 3rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            border: 3px solid transparent;
+        }
+
+        .rank-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .rank-card.rank-1 {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 215, 0, 0.05));
+            border-color: var(--gold);
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.3);
+            animation: pulse 2s infinite, fadeIn 1.2s ease;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 40px rgba(255, 215, 0, 0.3); }
+            50% { box-shadow: 0 0 60px rgba(255, 215, 0, 0.5); }
+        }
+
+        .rank-card.rank-2 {
+            background: linear-gradient(135deg, rgba(192, 192, 192, 0.15), rgba(192, 192, 192, 0.05));
+            border-color: var(--silver);
+            animation: fadeIn 1.4s ease;
+        }
+
+        .rank-card.rank-3 {
+            background: linear-gradient(135deg, rgba(205, 127, 50, 0.15), rgba(205, 127, 50, 0.05));
+            border-color: var(--bronze);
+            animation: fadeIn 1.6s ease;
+        }
+
+        .rank-number {
+            font-family: 'Righteous', cursive;
+            font-size: 5rem;
+            width: 100px;
+            text-align: center;
+            font-weight: bold;
+            position: relative;
+        }
+
+        .rank-1 .rank-number {
+            color: var(--gold);
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+        }
+
+        .rank-2 .rank-number {
+            color: var(--silver);
+            text-shadow: 0 0 20px rgba(192, 192, 192, 0.5);
+        }
+
+        .rank-3 .rank-number {
+            color: var(--bronze);
+            text-shadow: 0 0 20px rgba(205, 127, 50, 0.5);
+        }
+
+        .rank-4 .rank-number,
+        .rank-5 .rank-number {
+            color: #666;
+        }
+
+        .customer-info {
+            flex: 1;
+        }
+
+        .customer-name {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            letter-spacing: 1px;
+        }
+
+        .customer-stats {
+            display: flex;
+            gap: 2rem;
+            font-size: 1.25rem;
+            color: #888;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .amount {
+            font-family: 'Righteous', cursive;
+            font-size: 3.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, var(--accent), #ff6b9d);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .rank-1 .amount {
+            background: linear-gradient(135deg, var(--gold), #ffed4e);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .prize-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--accent);
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 1rem;
+            animation: popIn 0.6s ease;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .rank-1 .prize-badge {
+            background: linear-gradient(135deg, var(--gold), #ffed4e);
+            color: #000;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            animation: fadeIn 2s ease;
+        }
+
+        .footer-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--accent);
+        }
+
+        .footer-text {
+            font-size: 1.25rem;
+            color: #888;
+        }
+
+        .hall-of-fame {
+            margin-top: 2rem;
+            padding: 2rem;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 51, 102, 0.1));
+            border-radius: 20px;
+            border: 2px solid var(--gold);
+            animation: fadeIn 2.5s ease;
+        }
+
+        .hall-title {
+            font-family: 'Bebas Neue', cursive;
+            font-size: 2rem;
+            text-align: center;
+            color: var(--gold);
+            margin-bottom: 1rem;
+            letter-spacing: 2px;
+        }
+
+        .hall-winners {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .hall-winner {
+            text-align: center;
+        }
+
+        .hall-month {
+            font-size: 1rem;
+            color: #888;
+            margin-bottom: 0.5rem;
+        }
+
+        .hall-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+        }
+
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            gap: 2rem;
+        }
+
+        .loading-spinner {
+            width: 80px;
+            height: 80px;
+            border: 8px solid rgba(255, 255, 255, 0.1);
+            border-top: 8px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #888;
+        }
+
+        .to-next-rank {
+            font-size: 1rem;
+            color: #ffaa00;
+            margin-top: 0.5rem;
+            font-weight: 600;
+        }
+
+        .no-config-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            max-width: 600px;
+            padding: 3rem;
+            background: var(--card-bg);
+            border: 3px solid var(--accent);
+            border-radius: 24px;
+        }
+
+        .no-config-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .no-config-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        .no-config-text {
+            font-size: 1.25rem;
+            color: var(--text-dim);
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading" class="loading">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading Leaderboard...</div>
+    </div>
+
+    <div id="content" class="container" style="display: none;">
+        <header>
+            <div class="logo">☕</div>
+            <h1>Weekly Champions</h1>
+            <div class="week-info" id="weekInfo">Week of Feb 3 - Feb 10, 2026</div>
+        </header>
+
+        <div class="leaderboard" id="leaderboard">
+            <!-- Dynamic content will be inserted here -->
+        </div>
+
+        <div class="footer">
+            <div class="footer-title">🏆 Weekly Prize</div>
+            <div class="footer-text">Top 5 customers win exclusive rewards!</div>
+        </div>
+
+        <div class="hall-of-fame" id="hallOfFame" style="display: none;">
+            <div class="hall-title">🌟 Hall of Fame - Monthly Champions</div>
+            <div class="hall-winners" id="hallWinners">
+                <!-- Dynamic content -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL_KEY = 'cafeScriptUrl';
+        const REFRESH_INTERVAL = 10000; // 10 seconds
+
+        function getWeekDates() {
+            const now = new Date();
+            const dayOfWeek = now.getDay();
+            const monday = new Date(now);
+            monday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+            
+            const sunday = new Date(monday);
+            sunday.setDate(monday.getDate() + 6);
+            
+            const formatDate = (date) => {
+                const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                return `${months[date.getMonth()]} ${date.getDate()}`;
+            };
+            
+            return `Week of ${formatDate(monday)} - ${formatDate(sunday)}, ${now.getFullYear()}`;
+        }
+
+        function showNoConfigMessage() {
+            document.getElementById('loading').innerHTML = `
+                <div class="no-config-message">
+                    <div class="no-config-icon">⚠️</div>
+                    <div class="no-config-title">Configuration Required</div>
+                    <div class="no-config-text">
+                        Please set up the admin dashboard first.<br><br>
+                        Open <strong>admin-entry.html</strong> and complete the initial setup with your Google Apps Script URL.<br><br>
+                        Once configured there, this leaderboard will automatically connect.
+                    </div>
+                </div>
+            `;
+        }
+
+        async function loadLeaderboard() {
+            const scriptUrl = localStorage.getItem(SCRIPT_URL_KEY);
+            
+            if (!scriptUrl) {
+                showNoConfigMessage();
+                return;
+            }
+
+            try {
+                // Add timestamp to prevent caching issues
+                const url = scriptUrl + '?action=getLeaderboard&t=' + new Date().getTime();
+                
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                    },
+                    cache: 'no-cache'
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.error) {
+                    console.error('API Error:', data.error);
+                    showErrorMessage('API Error: ' + data.error);
+                    setTimeout(loadLeaderboard, 5000);
+                    return;
+                }
+
+                if (data.leaderboard && data.leaderboard.length > 0) {
+                    displayLeaderboard(data.leaderboard);
+                    displayHallOfFame(data.hallOfFame);
+                    
+                    // Hide loading, show content
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('content').style.display = 'flex';
+                } else {
+                    // No data yet, show empty state
+                    showEmptyState();
+                }
+            } catch (error) {
+                console.error('Error loading leaderboard:', error);
+                showErrorMessage('Connection Error: ' + error.message);
+                setTimeout(loadLeaderboard, 10000); // Retry after 10 seconds
+            }
+        }
+
+        function showErrorMessage(message) {
+            document.getElementById('loading').innerHTML = `
+                <div class="no-config-message">
+                    <div class="no-config-icon">⚠️</div>
+                    <div class="no-config-title">Connection Issue</div>
+                    <div class="no-config-text">
+                        ${message}<br><br>
+                        <strong>Troubleshooting:</strong><br>
+                        1. Check that your Google Apps Script is deployed as a web app<br>
+                        2. Ensure "Who has access" is set to "Anyone"<br>
+                        3. Verify the URL in admin-entry.html settings<br>
+                        4. Make sure you've run the setupSheets() function<br><br>
+                        Retrying in 10 seconds...
+                    </div>
+                </div>
+            `;
+        }
+
+        function showEmptyState() {
+            document.getElementById('loading').innerHTML = `
+                <div class="no-config-message">
+                    <div class="no-config-icon">📊</div>
+                    <div class="no-config-title">No Data Yet</div>
+                    <div class="no-config-text">
+                        The leaderboard is empty.<br><br>
+                        Start adding orders in the admin dashboard to see rankings appear here!<br><br>
+                        This page will automatically update every 10 seconds.
+                    </div>
+                </div>
+            `;
+            // Keep trying to load
+            setTimeout(loadLeaderboard, 10000);
+        }
+
+        function displayLeaderboard(leaderboard) {
+            const container = document.getElementById('leaderboard');
+            const weekInfo = document.getElementById('weekInfo');
+            
+            weekInfo.textContent = getWeekDates();
+            
+            const top5 = leaderboard.slice(0, 5);
+            
+            container.innerHTML = top5.map((customer, index) => {
+                const rank = index + 1;
+                const prizes = {
+                    1: '🏆 A Free JavaChipFrappe',
+                    2: '🥈 A Free HotChocolate',
+                    3: '🥉 A Free DutchTruffle Pastry',
+                    4: '🎁 50% Off on a Order',
+                    5: '✨ 30% Off on a Order' 
+                };
+
+                // Calculate amount to next rank
+                let toNextRank = '';
+                if (rank > 1) {
+                    // Show how much needed to reach the person above
+                    const aboveAmount = top5[index - 1].total;
+                    const diff = aboveAmount - customer.total;
+                    if (diff < 500) {
+                        toNextRank = `<div class="to-next-rank">+₹${diff + 1} to reach rank ${rank - 1}!</div>`;
+                    }
+                }
+                
+                // Special warning for rank 5 if someone is close behind
+                if (rank === 5 && leaderboard.length > 5) {
+                    const behindCustomer = leaderboard[5];
+                    const diff = customer.total - behindCustomer.total;
+                    if (diff < 500) {
+                        toNextRank = `<div class="to-next-rank">⚠️ Only ₹${diff} ahead of rank 6!</div>`;
+                    }
+                }
+
+                return `
+                    <div class="rank-card rank-${rank}">
+                        <div class="rank-number">#${rank}</div>
+                        <div class="customer-info">
+                            <div class="customer-name">${customer.name}</div>
+                            <div class="customer-stats">
+                                <div class="stat">📅 ${customer.orders || 0} orders</div>
+                                <div class="stat">☕ ${Math.ceil(customer.total / 200)} cups</div>
+                            </div>
+                            ${toNextRank}
+                        </div>
+                        <div class="amount">₹${customer.total.toLocaleString()}</div>
+                        <div class="prize-badge">${prizes[rank]}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function displayHallOfFame(hallOfFame) {
+            if (!hallOfFame || hallOfFame.length === 0) return;
+
+            const hallElement = document.getElementById('hallOfFame');
+            const winnersElement = document.getElementById('hallWinners');
+            
+            winnersElement.innerHTML = hallOfFame.slice(0, 3).map(winner => `
+                <div class="hall-winner">
+                    <div class="hall-month">${winner.month}</div>
+                    <div class="hall-name">👑 ${winner.name}</div>
+                </div>
+            `).join('');
+            
+            hallElement.style.display = 'block';
+        }
+
+        // Initial load
+        loadLeaderboard();
+
+        // Auto-refresh
+        setInterval(loadLeaderboard, REFRESH_INTERVAL);
+
+        // Update week info every minute
+        setInterval(() => {
+            const weekInfoElement = document.getElementById('weekInfo');
+            if (weekInfoElement) {
+                weekInfoElement.textContent = getWeekDates();
+            }
+        }, 60000);
+    </script>
+</body>
+</html>
